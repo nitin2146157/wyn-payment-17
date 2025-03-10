@@ -3,6 +3,7 @@ package com.wyn.payment.controller;
 import com.wyn.payment.entity.CardDetail;
 import com.wyn.payment.entity.ClientDetail;
 import com.wyn.payment.entity.TransactionInfo;
+import com.wyn.payment.entity.TransactionStatus;
 import com.wyn.payment.exception.CardDetailNotFound;
 import com.wyn.payment.repository.TransactionStatusRepository;
 import com.wyn.payment.service.CardDetailService;
@@ -53,7 +54,7 @@ public class CardDetailController extends BaseController {
 
         if (transactionInfo != null) {
             CardDetail cardDetail = new CardDetail();
-            cardDetail.setTransactionInfo(Optional.of(transactionInfo));
+            cardDetail.setTransactionInfo(transactionInfo);
             return ResponseEntity.ok(cardDetail);
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied");
@@ -66,7 +67,12 @@ public class CardDetailController extends BaseController {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
 
-        cardDetail.setTransactionInfo(transactionService.findById(cardDetail.getTransactionInfo().getId()));
+        Optional<TransactionInfo> transactionInfoOpt = transactionService.findById(cardDetail.getTransactionInfo().getId());
+        if (!transactionInfoOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction info not found");
+        }
+
+        cardDetail.setTransactionInfo(transactionInfoOpt.get());
         cardDetail.setCreatedTs(Calendar.getInstance().getTime());
         cardDetail.setModifiedTs(Calendar.getInstance().getTime());
         cardDetail.setActive(true);
@@ -139,7 +145,23 @@ public class CardDetailController extends BaseController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Card detail not found");
         }
 
-        cardDetail.getTransactionInfo().setTransactionStatus(transactionService.findByTransactionStatusId(updatedCardDetail.getTransactionInfo().getTransactionStatus().getId()));
+        TransactionInfo updatedTransactionInfo = updatedCardDetail.getTransactionInfo();
+        if (updatedTransactionInfo != null) {
+            Optional<TransactionStatus> transactionStatusOpt = transactionService.findByTransactionStatusId(updatedTransactionInfo.getTransactionStatus().getId());
+            if (transactionStatusOpt.isPresent()) {
+                TransactionInfo transactionInfo = cardDetail.getTransactionInfo();
+                if (transactionInfo != null) {
+                    transactionInfo.setTransactionStatus(transactionStatusOpt.get());
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction info not found in card detail");
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction status not found");
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Updated transaction info is null");
+        }
+      //  cardDetail.getTransactionInfo().setTransactionStatus(transactionService.findByTransactionStatusId(updatedCardDetail.getTransactionInfo().getTransactionStatus().getId()));
         try {
             if ("Y".equalsIgnoreCase(redact)) {
                 cardDetailService.expireCard(cardDetail);

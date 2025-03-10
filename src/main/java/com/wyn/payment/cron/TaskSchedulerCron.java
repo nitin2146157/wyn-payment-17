@@ -20,10 +20,10 @@ public class TaskSchedulerCron {
     @Autowired
     private CardDetailService cardDetailService;
 
-    @Value("${expire.days}")
+    @Value("${EXPIRE_DAYS}")
     private String expireDays;
 
-    @Value("${expire.days.split}")
+    @Value("${EXPIRE_DAYS_SPLIT}")
     private String expireDaysSplit;
 
     // 1 Seconds 2 Minutes 3 Hours 4 Day-of-Month 5 Month 6 Day-of-Week 7 Year (optional field)

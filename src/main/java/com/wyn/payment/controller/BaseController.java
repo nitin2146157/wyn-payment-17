@@ -28,7 +28,7 @@ public class BaseController {
         return new ResponseEntity<>("Access denied. You do not have permission to access this resource.", HttpStatus.FORBIDDEN);
     }
 
-    @RequestMapping("/error")
+    @RequestMapping("/custom-error")
     public ResponseEntity<String> webExceptionHandler() {
         return new ResponseEntity<>("Resource not found.", HttpStatus.NOT_FOUND);
     }

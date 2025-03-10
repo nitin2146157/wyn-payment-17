@@ -8,6 +8,7 @@ import java.io.Serializable;
 @Table(name = "card_type")
 public class CardType implements Serializable {
 
+
     @Id
     @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,6 +17,11 @@ public class CardType implements Serializable {
     @Column(name = "name")
     private String cardTypeName;
 
+    @OneToOne
+    @JoinColumn(name = "card_detail_id")
+    private CardDetail cardDetail;
+
+    // Getters and Setters
     public Integer getId() {
         return id;
     }
@@ -30,5 +36,13 @@ public class CardType implements Serializable {
 
     public void setCardTypeName(String cardTypeName) {
         this.cardTypeName = cardTypeName;
+    }
+
+    public CardDetail getCardDetail() {
+        return cardDetail;
+    }
+
+    public void setCardDetail(CardDetail cardDetail) {
+        this.cardDetail = cardDetail;
     }
 }

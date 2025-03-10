@@ -164,7 +164,7 @@ public class CardDetail implements Serializable {
         return transactionInfo;
     }
 
-    public void setTransactionInfo(Optional<TransactionInfo> transactionInfo) {
+    public void setTransactionInfo(TransactionInfo transactionInfo) {
         this.transactionInfo = transactionInfo;
     }
 

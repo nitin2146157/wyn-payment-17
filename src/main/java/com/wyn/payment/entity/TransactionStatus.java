@@ -8,12 +8,18 @@ import java.io.Serializable;
 @Table(name = "transaction_status")
 public class TransactionStatus implements Serializable {
 
-
     @Id
     @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name="name")
+    private String name;
+
+    @OneToOne(mappedBy = "transactionStatus")
+    private TransactionInfo transactionInfo;
+
+    // Getters and Setters
     public Integer getId() {
         return id;
     }
@@ -30,6 +36,13 @@ public class TransactionStatus implements Serializable {
         this.name = name;
     }
 
-    @Column(name="name")
-    private String name;
+    public TransactionInfo getTransactionInfo() {
+        return transactionInfo;
+    }
+
+    public void setTransactionInfo(TransactionInfo transactionInfo) {
+        this.transactionInfo = transactionInfo;
+    }
+
+
 }

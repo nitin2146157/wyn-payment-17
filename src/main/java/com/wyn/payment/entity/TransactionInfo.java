@@ -44,6 +44,11 @@ public class TransactionInfo implements Serializable {
     @Column(name="active")
     private boolean active;
 
+    @OneToOne
+    @JoinColumn(name = "card_detail_id")
+    private CardDetail cardDetail;
+
+    // Getters and Setters
     public Integer getId() {
         return id;
     }
@@ -64,7 +69,7 @@ public class TransactionInfo implements Serializable {
         return transactionStatus;
     }
 
-    public void setTransactionStatus(Optional<TransactionStatus> transactionStatus) {
+    public void setTransactionStatus(TransactionStatus transactionStatus) {
         this.transactionStatus = transactionStatus;
     }
 
@@ -114,5 +119,13 @@ public class TransactionInfo implements Serializable {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public CardDetail getCardDetail() {
+        return cardDetail;
+    }
+
+    public void setCardDetail(CardDetail cardDetail) {
+        this.cardDetail = cardDetail;
     }
 }
