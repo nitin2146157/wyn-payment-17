@@ -1,5 +1,6 @@
 package com.wyn.payment.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.type.YesNoConverter;
 
@@ -17,10 +18,12 @@ public class TransactionInfo implements Serializable {
 
     @OneToOne
     @JoinColumn(name="client_detail_id")
+ //   @JsonIgnore
     private ClientDetail clientDetail;
 
     @OneToOne
     @JoinColumn(name="transaction_status_id")
+ //   @JsonIgnore
     private TransactionStatus transactionStatus;
 
     @Column(name="reference_number")
@@ -44,9 +47,12 @@ public class TransactionInfo implements Serializable {
     @Column(name="active")
     private boolean active;
 
-    @OneToOne
-    @JoinColumn(name = "card_detail_id")
-    private CardDetail cardDetail;
+
+
+//    @OneToOne(mappedBy = "transactionInfo")
+//    private CardDetail cardDetail;
+
+
 
     // Getters and Setters
     public Integer getId() {
@@ -121,11 +127,13 @@ public class TransactionInfo implements Serializable {
         this.active = active;
     }
 
-    public CardDetail getCardDetail() {
-        return cardDetail;
-    }
+//    public CardDetail getCardDetail() {
+//        return cardDetail;
+//    }
+//
+//    public void setCardDetail(CardDetail cardDetail) {
+//        this.cardDetail = cardDetail;
+//    }
 
-    public void setCardDetail(CardDetail cardDetail) {
-        this.cardDetail = cardDetail;
-    }
+
 }

@@ -1,4 +1,5 @@
 package com.wyn.payment.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.hibernate.type.YesNoConverter;
@@ -27,7 +28,7 @@ public class CardDetail implements Serializable {
     @Column(name = "card_number")
     private String cardNumber;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "card_type_id")
     private CardType cardType;
 
