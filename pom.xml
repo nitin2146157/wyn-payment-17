@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.4.3</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.wyn.payment</groupId>
 	<artifactId>wyn-payment-17</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>wyn-payment-17</name>
 	<description>Demo project for Spring Boot</description>
-	<url/>
+	<url />
 	<licenses>
-		<license/>
+		<license />
 	</licenses>
 	<developers>
-		<developer/>
+		<developer />
 	</developers>
 	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
+		<connection />
+		<developerConnection />
+		<tag />
+		<url />
 	</scm>
 	<properties>
 		<java.version>17</java.version>
@@ -52,6 +53,12 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-secretmanager</artifactId>
+			<version>2.56.0</version>
+		</dependency>
+
 		<!-- Jakarta Persistence and Hibernate -->
 		<dependency>
 			<groupId>jakarta.persistence</groupId>
@@ -67,7 +74,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>r05</version>
+			<version>31.1-jre</version>
 		</dependency>
 
 		<dependency>
@@ -80,11 +87,11 @@
 		</dependency>
 
 		<!-- Microsoft SQL Server Driver -->
-<!--		<dependency>-->
-<!--			<groupId>com.microsoft.sqlserver</groupId>-->
-<!--			<artifactId>mssql-jdbc</artifactId>-->
-<!--			<version>12.2.0.jre11</version>-->
-<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>com.microsoft.sqlserver</groupId>-->
+		<!--			<artifactId>mssql-jdbc</artifactId>-->
+		<!--			<version>12.2.0.jre11</version>-->
+		<!--		</dependency>-->
 
 		<dependency>
 			<groupId>com.mysql</groupId>
