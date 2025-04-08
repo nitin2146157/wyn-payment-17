@@ -16,8 +16,8 @@ public class TransactionStatus implements Serializable {
     @Column(name="name")
     private String name;
 
-    @OneToOne(mappedBy = "transactionStatus")
-    private TransactionInfo transactionInfo;
+//    @OneToOne(mappedBy = "transactionStatus")
+//    private TransactionInfo transactionInfo;
 
     // Getters and Setters
     public Integer getId() {
@@ -36,13 +36,13 @@ public class TransactionStatus implements Serializable {
         this.name = name;
     }
 
-    public TransactionInfo getTransactionInfo() {
-        return transactionInfo;
-    }
-
-    public void setTransactionInfo(TransactionInfo transactionInfo) {
-        this.transactionInfo = transactionInfo;
-    }
+//    public TransactionInfo getTransactionInfo() {
+//        return transactionInfo;
+//    }
+//
+//    public void setTransactionInfo(TransactionInfo transactionInfo) {
+//        this.transactionInfo = transactionInfo;
+//    }
 
 
 }

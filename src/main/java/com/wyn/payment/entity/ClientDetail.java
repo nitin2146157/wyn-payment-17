@@ -19,8 +19,8 @@ public class ClientDetail implements Serializable {
     @Column(name = "description")
     private String clientDesc;
 
-    @OneToOne(mappedBy = "clientDetail")
-    private TransactionInfo transactionInfo;
+//    @OneToOne(mappedBy = "clientDetail")
+//    private TransactionInfo transactionInfo;
 
     // Getters and Setters
     public Integer getId() {
@@ -47,11 +47,11 @@ public class ClientDetail implements Serializable {
         this.clientDesc = clientDesc;
     }
 
-    public TransactionInfo getTransactionInfo() {
-        return transactionInfo;
-    }
-
-    public void setTransactionInfo(TransactionInfo transactionInfo) {
-        this.transactionInfo = transactionInfo;
-    }
+//    public TransactionInfo getTransactionInfo() {
+//        return transactionInfo;
+//    }
+//
+//    public void setTransactionInfo(TransactionInfo transactionInfo) {
+//        this.transactionInfo = transactionInfo;
+//    }
 }

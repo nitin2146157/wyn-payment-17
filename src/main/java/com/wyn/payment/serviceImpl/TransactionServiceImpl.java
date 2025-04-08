@@ -3,6 +3,7 @@ package com.wyn.payment.serviceImpl;
 import com.wyn.payment.entity.ClientDetail;
 import com.wyn.payment.entity.TransactionInfo;
 import com.wyn.payment.entity.TransactionStatus;
+import com.wyn.payment.repository.ClientDetailRepository;
 import com.wyn.payment.repository.TransactionInfoRepository;
 import com.wyn.payment.repository.TransactionStatusRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,6 +27,9 @@ public class TransactionServiceImpl implements TransactionService {
     private TransactionInfoRepository transactionInfoRepository;
     @Autowired
     private TransactionStatusRepository transactionStatusRepository;
+    @Autowired
+    private ClientDetailRepository clientDetailRepository;
+
 
     @Override
     @Transactional
@@ -44,6 +48,7 @@ public class TransactionServiceImpl implements TransactionService {
 
                 BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
                 String hashKeyMd5 = passwordEncoder.encode(hashKey);
+                LOGGER.info("Encoded hashKeyMd5: {}", hashKeyMd5);
 
                 transactionInfo.setClientDetail(clientDetail);
                 transactionInfo.setUserName(userName);
@@ -54,6 +59,7 @@ public class TransactionServiceImpl implements TransactionService {
                 transactionInfo.setActive(true);
 
                 if (transactionInfoRepository.save(transactionInfo) != null) {
+                    LOGGER.info("TransactionInfo saved with hashKeyMd5: {}", transactionInfo.getHashKey());
                     return hashKeyMd5;
                 }
                 return null;
@@ -129,5 +135,29 @@ public class TransactionServiceImpl implements TransactionService {
         }
         return null;
     }
+
+    public TransactionInfo createObject(TransactionInfo object){
+
+
+        ClientDetail clientDetail = object.getClientDetail();
+        if (clientDetail == null) {
+            clientDetail = new ClientDetail();
+        }
+
+        clientDetail.setClientDesc(object.getClientDetail().getClientDesc());
+        clientDetail.setClientName(object.getClientDetail().getClientName());
+
+        ClientDetail details = clientDetailRepository.save(clientDetail);
+
+        TransactionStatus transactionStatus = new TransactionStatus();
+        transactionStatus.setName(object.getTransactionStatus().getName());
+        TransactionStatus status = transactionStatusRepository.save(transactionStatus);
+
+        object.setClientDetail(details);
+        object.setTransactionStatus(status);
+
+        return transactionInfoRepository.save(object);
+    }
+
 }
 

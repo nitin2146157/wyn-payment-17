@@ -17,9 +17,9 @@ public class CardType implements Serializable {
     @Column(name = "name")
     private String cardTypeName;
 
-    @OneToOne
-    @JoinColumn(name = "card_detail_id")
-    private CardDetail cardDetail;
+//    @OneToOne
+//    @JoinColumn(name = "card_detail_id")
+//    private CardDetail cardDetail;
 
     // Getters and Setters
     public Integer getId() {
@@ -38,11 +38,11 @@ public class CardType implements Serializable {
         this.cardTypeName = cardTypeName;
     }
 
-    public CardDetail getCardDetail() {
-        return cardDetail;
-    }
-
-    public void setCardDetail(CardDetail cardDetail) {
-        this.cardDetail = cardDetail;
-    }
+//    public CardDetail getCardDetail() {
+//        return cardDetail;
+//    }
+//
+//    public void setCardDetail(CardDetail cardDetail) {
+//        this.cardDetail = cardDetail;
+//    }
 }

@@ -1,15 +1,13 @@
 package com.wyn.payment.controller;
 
-import com.wyn.payment.entity.CardDetail;
-import com.wyn.payment.entity.ClientDetail;
-import com.wyn.payment.entity.TransactionInfo;
-import com.wyn.payment.entity.TransactionStatus;
+import com.wyn.payment.entity.*;
 import com.wyn.payment.exception.CardDetailNotFound;
-import com.wyn.payment.repository.TransactionStatusRepository;
+import com.wyn.payment.repository.*;
 import com.wyn.payment.service.CardDetailService;
 import com.wyn.payment.service.CardTypeService;
 import com.wyn.payment.service.ClientDetailService;
 import com.wyn.payment.service.TransactionService;
+import com.wyn.payment.serviceImpl.TransactionServiceImpl;
 import com.wyn.payment.util.Gentools;
 import org.springframework.validation.BindingResult;
 import jakarta.validation.Valid;
@@ -34,13 +32,28 @@ public class CardDetailController extends BaseController {
     private CardDetailService cardDetailService;
 
     @Autowired
+    private CardDetailRepository cardDetailRepository;
+
+    @Autowired
     private ClientDetailService clientDetailService;
+
+    @Autowired
+    private ClientDetailRepository clientDetailRepository;
 
     @Autowired
     private CardTypeService cardTypeService;
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private TransactionInfoRepository repo;
+
+    @Autowired
+    private TransactionServiceImpl transactionServiceImpl;
+
+    @Autowired
+    private CardTypeRepository cardTypeRepository;
 
     @Value("${EXPIRE_DAYS}")
     private String expireDays;
@@ -62,12 +75,15 @@ public class CardDetailController extends BaseController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createCardDetail(@Valid @RequestBody CardDetail cardDetail, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }
+    public ResponseEntity<?> createCardDetail(@Valid @RequestBody CardDetail cardDetail) {
+//        if (result.hasErrors()) {
+//            return ResponseEntity.badRequest().body(result.getAllErrors());
+//        }
 
-        Optional<TransactionInfo> transactionInfoOpt = transactionService.findById(cardDetail.getTransactionInfo().getId());
+        CardType type = cardTypeRepository.save(cardDetail.getCardType());
+        TransactionInfo createTransactionInfo = transactionServiceImpl.createObject(cardDetail.getTransactionInfo());
+
+        Optional<TransactionInfo> transactionInfoOpt = transactionService.findById(createTransactionInfo.getId());
         if (!transactionInfoOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction info not found");
         }
@@ -83,11 +99,25 @@ public class CardDetailController extends BaseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create card detail");
         }
 
-        TransactionInfo transactionInfo = cardDetail.getTransactionInfo();
-        transactionInfo.setTransactionStatus(transactionService.findByTransactionStatusName(TransactionStatusRepository.Status.PENDING.toString()));
-        transactionService.updateTransactionInfo(transactionInfo);
+//        TransactionInfo transactionInfo = cardDetail.getTransactionInfo();
+//        transactionInfo.setTransactionStatus(transactionService.findByTransactionStatusName(TransactionStatusRepository.Status.PENDING.toString()));
+//        transactionService.updateTransactionInfo(transactionInfo);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCardDetail);
+
+//        if(cardDetail.getTransactionInfo()!=null){
+//            TransactionInfo transactionInfo = cardDetail.getTransactionInfo();
+//
+//            if(transactionInfo.getClientDetail()!=null){
+//                transactionInfo.setClientDetail(clientDetailRepository.save(transactionInfo.getClientDetail()));
+//            }
+//
+//            cardDetail.setTransactionInfo(repo.save(transactionInfo));
+//        }
+//
+//        CardDetail savedCardDetail = cardDetailRepository.save(cardDetail);
+//
+//        return ResponseEntity.ok(savedCardDetail);
     }
 
     @GetMapping("/list")
@@ -180,4 +210,15 @@ public class CardDetailController extends BaseController {
         cardDetailService.expireOldCardsbyDays(Gentools.parseInt(expireDays), Gentools.parseInt(expireDaysSplit));
         return ResponseEntity.ok("Old cards expired successfully");
     }
+
+//    @GetMapping("/test")
+//    public String testpost(){
+//
+//        return "test succesful";
+//    }
+//    @GetMapping("/test2")
+//    public String testpost2(){
+//
+//        return "test succesful";
+//    }
 }
