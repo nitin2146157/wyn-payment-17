@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 import static com.wyn.payment.util.Gentools.daysBetween;
+
 @RestController
 @RequestMapping("/card")
 public class CardDetailController extends BaseController {
@@ -75,50 +76,88 @@ public class CardDetailController extends BaseController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createCardDetail(@Valid @RequestBody CardDetail cardDetail) {
-//        if (result.hasErrors()) {
-//            return ResponseEntity.badRequest().body(result.getAllErrors());
-//        }
-
-        CardType type = cardTypeRepository.save(cardDetail.getCardType());
-        TransactionInfo createTransactionInfo = transactionServiceImpl.createObject(cardDetail.getTransactionInfo());
-
-        Optional<TransactionInfo> transactionInfoOpt = transactionService.findById(createTransactionInfo.getId());
-        if (!transactionInfoOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction info not found");
+    public ResponseEntity<?> createCardDetail(@Valid @RequestBody CardDetail cardDetail, BindingResult result) {
+        if (result.hasErrors()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("cardDetail", cardDetail);
+            response.put("currentYear", Calendar.getInstance().getWeekYear());
+            response.put("cardTypeList", cardTypeService.findAll());
+            return ResponseEntity.badRequest().body(response);
         }
-
-        cardDetail.setTransactionInfo(transactionInfoOpt.get());
+        cardDetail.setTransactionInfo(transactionService.findById(cardDetail.getTransactionInfo().getId()).get());
         cardDetail.setCreatedTs(Calendar.getInstance().getTime());
         cardDetail.setModifiedTs(Calendar.getInstance().getTime());
         cardDetail.setActive(true);
-
+        LOGGER.info("Creating card detail");
         CardDetail createdCardDetail = cardDetailService.create(cardDetail);
-
         if (createdCardDetail == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create card detail");
+            Map<String, Object> response = new HashMap<>();
+            response.put("cardDetail", cardDetail);
+            response.put("currentYear", Calendar.getInstance().getWeekYear());
+            response.put("cardTypeList", cardTypeService.findAll());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-
-//        TransactionInfo transactionInfo = cardDetail.getTransactionInfo();
-//        transactionInfo.setTransactionStatus(transactionService.findByTransactionStatusName(TransactionStatusRepository.Status.PENDING.toString()));
-//        transactionService.updateTransactionInfo(transactionInfo);
-
+        LOGGER.info("Card detail created successfully, updating transaction info");
+        TransactionInfo transactionInfo = cardDetail.getTransactionInfo();
+        transactionInfo.setTransactionStatus(
+                transactionService.findByTransactionStatusName(TransactionStatusRepository.Status.PENDING.toString()));
+        transactionService.updateTransactionInfo(transactionInfo);
+        LOGGER.info("Transaction info updated, returning response");
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCardDetail);
-
-//        if(cardDetail.getTransactionInfo()!=null){
-//            TransactionInfo transactionInfo = cardDetail.getTransactionInfo();
-//
-//            if(transactionInfo.getClientDetail()!=null){
-//                transactionInfo.setClientDetail(clientDetailRepository.save(transactionInfo.getClientDetail()));
-//            }
-//
-//            cardDetail.setTransactionInfo(repo.save(transactionInfo));
-//        }
-//
-//        CardDetail savedCardDetail = cardDetailRepository.save(cardDetail);
-//
-//        return ResponseEntity.ok(savedCardDetail);
     }
+
+    // @PostMapping("/create")
+    // public ResponseEntity<?> createCardDetail(@Valid @RequestBody CardDetail
+    // cardDetail) {
+    // // if (result.hasErrors()) {
+    // // return ResponseEntity.badRequest().body(result.getAllErrors());
+    // // }
+
+    // CardType type = cardTypeRepository.save(cardDetail.getCardType());
+    // TransactionInfo createTransactionInfo =
+    // transactionServiceImpl.createObject(cardDetail.getTransactionInfo());
+
+    // Optional<TransactionInfo> transactionInfoOpt =
+    // transactionService.findById(createTransactionInfo.getId());
+    // if (!transactionInfoOpt.isPresent()) {
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction info not
+    // found");
+    // }
+
+    // cardDetail.setTransactionInfo(transactionInfoOpt.get());
+    // cardDetail.setCreatedTs(Calendar.getInstance().getTime());
+    // cardDetail.setModifiedTs(Calendar.getInstance().getTime());
+    // cardDetail.setActive(true);
+
+    // CardDetail createdCardDetail = cardDetailService.create(cardDetail);
+
+    // if (createdCardDetail == null) {
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed
+    // to create card detail");
+    // }
+
+    // // TransactionInfo transactionInfo = cardDetail.getTransactionInfo();
+    // //
+    // transactionInfo.setTransactionStatus(transactionService.findByTransactionStatusName(TransactionStatusRepository.Status.PENDING.toString()));
+    // // transactionService.updateTransactionInfo(transactionInfo);
+
+    // return ResponseEntity.status(HttpStatus.CREATED).body(createdCardDetail);
+
+    // // if(cardDetail.getTransactionInfo()!=null){
+    // // TransactionInfo transactionInfo = cardDetail.getTransactionInfo();
+    // //
+    // // if(transactionInfo.getClientDetail()!=null){
+    // //
+    // transactionInfo.setClientDetail(clientDetailRepository.save(transactionInfo.getClientDetail()));
+    // // }
+    // //
+    // // cardDetail.setTransactionInfo(repo.save(transactionInfo));
+    // // }
+    // //
+    // // CardDetail savedCardDetail = cardDetailRepository.save(cardDetail);
+    // //
+    // // return ResponseEntity.ok(savedCardDetail);
+    // }
 
     @GetMapping("/list")
     public ResponseEntity<List<CardDetail>> cardDetailListPage(@RequestParam(required = false) String referenceNo) {
@@ -126,6 +165,7 @@ public class CardDetailController extends BaseController {
         if (!Gentools.isEmptyString(referenceNo)) {
             cardDetailList = cardDetailService.findByReferenceNo(referenceNo);
         }
+        LOGGER.info("hlljd");
         return ResponseEntity.ok(cardDetailList);
     }
 
@@ -158,12 +198,12 @@ public class CardDetailController extends BaseController {
                 "cardDetail", cardDetail,
                 "daysToExpiry", ++daysToExpiry + " day(s)",
                 "cardTypeList", cardTypeService.findAll(),
-                "transactionStatusList", transactionService.findByTransactionStatusIdIn(Arrays.asList(2, 3, 4))
-        ));
+                "transactionStatusList", transactionService.findByTransactionStatusIdIn(Arrays.asList(2, 3, 4))));
     }
 
     @PostMapping("/{clientId}/edit/{id}")
-    public ResponseEntity<?> editCardDetail(@RequestBody CardDetail updatedCardDetail, @PathVariable Integer id, @PathVariable Integer clientId, @RequestParam(required = false) String redact) {
+    public ResponseEntity<?> editCardDetail(@RequestBody CardDetail updatedCardDetail, @PathVariable Integer id,
+            @PathVariable Integer clientId, @RequestParam(required = false) String redact) {
         Optional<ClientDetail> clientDetail = clientDetailService.findById(clientId);
 
         if (!clientDetail.isPresent()) {
@@ -177,13 +217,15 @@ public class CardDetailController extends BaseController {
 
         TransactionInfo updatedTransactionInfo = updatedCardDetail.getTransactionInfo();
         if (updatedTransactionInfo != null) {
-            Optional<TransactionStatus> transactionStatusOpt = transactionService.findByTransactionStatusId(updatedTransactionInfo.getTransactionStatus().getId());
+            Optional<TransactionStatus> transactionStatusOpt = transactionService
+                    .findByTransactionStatusId(updatedTransactionInfo.getTransactionStatus().getId());
             if (transactionStatusOpt.isPresent()) {
                 TransactionInfo transactionInfo = cardDetail.getTransactionInfo();
                 if (transactionInfo != null) {
                     transactionInfo.setTransactionStatus(transactionStatusOpt.get());
                 } else {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction info not found in card detail");
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("Transaction info not found in card detail");
                 }
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction status not found");
@@ -191,7 +233,7 @@ public class CardDetailController extends BaseController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Updated transaction info is null");
         }
-      //  cardDetail.getTransactionInfo().setTransactionStatus(transactionService.findByTransactionStatusId(updatedCardDetail.getTransactionInfo().getTransactionStatus().getId()));
+        // cardDetail.getTransactionInfo().setTransactionStatus(transactionService.findByTransactionStatusId(updatedCardDetail.getTransactionInfo().getTransactionStatus().getId()));
         try {
             if ("Y".equalsIgnoreCase(redact)) {
                 cardDetailService.expireCard(cardDetail);
@@ -201,7 +243,8 @@ public class CardDetailController extends BaseController {
             return ResponseEntity.ok("Card status was successfully updated");
         } catch (CardDetailNotFound e) {
             LOGGER.info("There was an error updating card status. Card not found >" + e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There was an error updating card status. Card not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("There was an error updating card status. Card not found");
         }
     }
 
@@ -211,14 +254,14 @@ public class CardDetailController extends BaseController {
         return ResponseEntity.ok("Old cards expired successfully");
     }
 
-//    @GetMapping("/test")
-//    public String testpost(){
-//
-//        return "test succesful";
-//    }
-//    @GetMapping("/test2")
-//    public String testpost2(){
-//
-//        return "test succesful";
-//    }
+    // @GetMapping("/test")
+    // public String testpost(){
+    //
+    // return "test succesful";
+    // }
+    // @GetMapping("/test2")
+    // public String testpost2(){
+    //
+    // return "test succesful";
+    // }
 }

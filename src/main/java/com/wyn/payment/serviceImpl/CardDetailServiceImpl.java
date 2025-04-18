@@ -54,15 +54,32 @@ public class CardDetailServiceImpl implements CardDetailService {
         CardDetail updatedCardDetail = cardDetailRepository.findById(cardDetail.getId())
                 .orElseThrow(CardDetailNotFound::new);
 
-        updatedCardDetail.getTransactionInfo().setTransactionStatus(cardDetail.getTransactionInfo().getTransactionStatus());
+        updatedCardDetail.getTransactionInfo()
+                .setTransactionStatus(cardDetail.getTransactionInfo().getTransactionStatus());
         updatedCardDetail.setModifiedTs(Calendar.getInstance().getTime());
         return updatedCardDetail;
     }
 
+    // @Override
+    // @Transactional(rollbackFor = CardDetailNotFound.class)
+    // public CardDetail update(CardDetail cardDetail) throws CardDetailNotFound {
+    // CardDetail updatedCardDetail =
+    // cardDetailRepository.findById(cardDetail.getId())
+    // .orElseThrow(CardDetailNotFound::new);
+
+    // updatedCardDetail.getTransactionInfo()
+    // .setTransactionStatus(cardDetail.getTransactionInfo().getTransactionStatus());
+    // updatedCardDetail.setCardName(cardDetail.getCardName());// Ensure other
+    // fields are updated
+    // updatedCardDetail.setModifiedTs(Calendar.getInstance().getTime());
+    // return cardDetailRepository.save(updatedCardDetail);// Save the changes
+    // }
+
     @Override
     @Transactional
     public List<CardDetail> findByReferenceNo(String referenceNo) {
-        return cardDetailRepository.findByTransactionInfo_ReferenceNumberOrderByModifiedTsDescCreatedTsDesc(referenceNo);
+        return cardDetailRepository
+                .findByTransactionInfo_ReferenceNumberOrderByModifiedTsDescCreatedTsDesc(referenceNo);
     }
 
     @Override
@@ -79,20 +96,23 @@ public class CardDetailServiceImpl implements CardDetailService {
         c.add(Calendar.DATE, -days);
         Date expireDate = c.getTime();
 
-        List<CardDetail> cardDetailList = cardDetailRepository.findByCreatedTsLessThanAndActiveAndSplitAndTransactionInfo_Active(expireDate, true, false, true);
+        List<CardDetail> cardDetailList = cardDetailRepository
+                .findByCreatedTsLessThanAndActiveAndSplitAndTransactionInfo_Active(expireDate, true, false, true);
 
         // Expire cards by split days
         c.setTime(todayDate);
         c.add(Calendar.DATE, -splitDays);
         expireDate = c.getTime();
 
-        cardDetailList.addAll(cardDetailRepository.findByCreatedTsLessThanAndActiveAndSplitAndTransactionInfo_Active(expireDate, true, true, true));
+        cardDetailList.addAll(cardDetailRepository
+                .findByCreatedTsLessThanAndActiveAndSplitAndTransactionInfo_Active(expireDate, true, true, true));
 
         if (!cardDetailList.isEmpty()) {
             for (CardDetail cardDetail : cardDetailList) {
                 expireCard(cardDetail);
                 cardExpiredCount++;
-                LOGGER.info("Expired card id: {} Transaction Info id: {}", cardDetail.getId(), cardDetail.getTransactionInfo().getId());
+                LOGGER.info("Expired card id: {} Transaction Info id: {}", cardDetail.getId(),
+                        cardDetail.getTransactionInfo().getId());
             }
         } else {
             LOGGER.info("No cards to expire");
@@ -105,8 +125,10 @@ public class CardDetailServiceImpl implements CardDetailService {
     public void expireCard(CardDetail cardDetail) {
         try {
             String cardNumber = cardDetail.getCardNumber();
-            String last4Digits = cardNumber.length() == 15 ? cardNumber.substring(11, 15) : cardNumber.substring(12, 16);
-            String maskedCardNumber = cardNumber.length() == 15 ? "XXXXXXXXXXX" + last4Digits : "XXXXXXXXXXXX" + last4Digits;
+            String last4Digits = cardNumber.length() == 15 ? cardNumber.substring(11, 15)
+                    : cardNumber.substring(12, 16);
+            String maskedCardNumber = cardNumber.length() == 15 ? "XXXXXXXXXXX" + last4Digits
+                    : "XXXXXXXXXXXX" + last4Digits;
 
             cardDetail.setActive(false);
             cardDetail.setCardNumber(maskedCardNumber);
